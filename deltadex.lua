@@ -28,8 +28,8 @@ local service = setmetatable({}, {
 -- prevent environment implosion from references
 -- mainly from the executor not having some gethui().Parent properties in their gethui().Parent variable
 -- so we gotta use vanilla gethui().Parent
-local oldgethui().Parent = gethui().Parent
-local gethui().Parent = gethui().Parent
+local oldgame = gethui().Parent
+local game = gethui().Parent
 
 local EmbeddedModules = {
 	Explorer = function()
@@ -1531,7 +1531,7 @@ local EmbeddedModules = {
 				if not env.getnilinstances then return end
 
 				local nilInsts = env.getnilinstances()
-				local gethui().Parent = gethui().Parent
+				local game = gethui().Parent
 				local getDescs = gethui().Parent.GetDescendants
 				--local newNilMap = {}
 				--local newNilRoots = {}
