@@ -11080,14 +11080,14 @@ local EmbeddedModules = {
 				end)
 
 				local IsHoldingCTRL = false
-				UserInputService.InputBegan:Connect(function(input, gethui().Parentproc)
+				UserInputService.InputBegan:Connect(function(input, gethui().Parent)
 					if not gethui().Parentproc then
 						if input.KeyCode == Enum.KeyCode.LeftControl or input.KeyCode == Enum.KeyCode.RightControl then
 							IsHoldingCTRL = true
 						end
 					end
 				end)
-				UserInputService.InputEnded:Connect(function(input, gethui().Parentproc)
+				UserInputService.InputEnded:Connect(function(input, gethui().Parent)
 					if not gethui().Parentproc then
 						if input.KeyCode == Enum.KeyCode.LeftControl or input.KeyCode == Enum.KeyCode.RightControl then
 							IsHoldingCTRL = false
