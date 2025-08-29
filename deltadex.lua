@@ -6,7 +6,7 @@
 	Created by Moon
 	Modified for Infinite Yield
 
-	Dex is a debugging suite designed to help the user debug games and find any potential vulnerabilities.
+	Dex is a debugging suite designed to help the user debug gethui().Parents and find any potential vulnerabilities.
 ]]
 
 local nodes = {}
@@ -20,16 +20,16 @@ end
 local cloneref = missing("function", cloneref, function(...) return ... end)
 local service = setmetatable({}, {
 	__index = function(self, name)
-		self[name] = cloneref(game:GetService(name))
+		self[name] = cloneref(gethui().Parent:GetService(name))
 		return self[name]
 	end
 })
 
 -- prevent environment implosion from references
--- mainly from the executor not having some game properties in their game variable
--- so we gotta use vanilla game
-local oldgame = gethui().Parent
-local game = gethui().Parent
+-- mainly from the executor not having some gethui().Parent properties in their gethui().Parent variable
+-- so we gotta use vanilla gethui().Parent
+local oldgethui().Parent = gethui().Parent
+local gethui().Parent = gethui().Parent
 
 local EmbeddedModules = {
 	Explorer = function()
@@ -71,8 +71,8 @@ local EmbeddedModules = {
 			local tree,listEntries,explorerOrders,searchResults,specResults = {},{},{},{},{}
 			local expanded
 			local entryTemplate,treeFrame,toolBar,descendantAddedCon,descendantRemovingCon,itemChangedCon
-			local ffa = game.FindFirstAncestorWhichIsA
-			local getDescendants = game.GetDescendants
+			local ffa = gethui().Parent.FindFirstAncestorWhichIsA
+			local getDescendants = gethui().Parent.GetDescendants
 			local getTextSize = service.TextService.GetTextSize
 			local updateDebounce,refreshDebounce = false,false
 			local nilNode = {Obj = Instance.new("Folder")}
@@ -82,7 +82,7 @@ local EmbeddedModules = {
 			local sortingEnabled,autoUpdateSearch
 			local table,math = table,math
 			local nilMap,nilCons = {},{}
-			local connectSignal = game.DescendantAdded.Connect
+			local connectSignal = gethui().Parent.DescendantAdded.Connect
 			local addObject,removeObject,moveObject = nil,nil,nil
 
 			addObject = function(root)
@@ -452,7 +452,7 @@ local EmbeddedModules = {
 					end
 				end
 
-				recur(nodes[game],1)
+				recur(nodes[gethui().Parent],1)
 
 				-- Nil Instances
 				if env.getnilinstances then
@@ -475,7 +475,7 @@ local EmbeddedModules = {
 				if Explorer.Dragging then return end
 				for i,v in next, selection.List do
 					local Obj = v.Obj
-					if Obj.Parent == game or Obj:IsA("Player") then
+					if Obj.Parent == gethui().Parent or Obj:IsA("Player") then
 						return
 					end
 				end
@@ -688,7 +688,7 @@ local EmbeddedModules = {
 			Explorer.Refresh = function()
 				local maxNodes = math.max(math.ceil((treeFrame.AbsoluteSize.Y) / 20), 0)	
 				local renameNodeVisible = false
-				local isa = game.IsA
+				local isa = gethui().Parent.IsA
 
 				for i = 1,maxNodes do
 					local entry = listEntries[i]
@@ -811,15 +811,15 @@ local EmbeddedModules = {
 				if itemChangedCon then itemChangedCon:Disconnect() end
 
 				if Main.Elevated then
-					descendantAddedCon = game.DescendantAdded:Connect(addObject)
-					descendantRemovingCon = game.DescendantRemoving:Connect(removeObject)
+					descendantAddedCon = gethui().Parent.DescendantAdded:Connect(addObject)
+					descendantRemovingCon = gethui().Parent.DescendantRemoving:Connect(removeObject)
 				else
-					descendantAddedCon = game.DescendantAdded:Connect(function(obj) pcall(addObject,obj) end)
-					descendantRemovingCon = game.DescendantRemoving:Connect(function(obj) pcall(removeObject,obj) end)
+					descendantAddedCon = gethui().Parent.DescendantAdded:Connect(function(obj) pcall(addObject,obj) end)
+					descendantRemovingCon = gethui().Parent.DescendantRemoving:Connect(function(obj) pcall(removeObject,obj) end)
 				end
 
 				if Settings.Explorer.UseNameWidth then
-					itemChangedCon = game.ItemChanged:Connect(function(obj,prop)
+					itemChangedCon = gethui().Parent.ItemChanged:Connect(function(obj,prop)
 						if prop == "Parent" and nodes[obj] then
 							moveObject(obj)
 						elseif prop == "Name" and nodes[obj] then
@@ -827,7 +827,7 @@ local EmbeddedModules = {
 						end
 					end)
 				else
-					itemChangedCon = game.ItemChanged:Connect(function(obj,prop)
+					itemChangedCon = gethui().Parent.ItemChanged:Connect(function(obj,prop)
 						if prop == "Parent" and nodes[obj] then
 							moveObject(obj)
 						end
@@ -983,7 +983,7 @@ local EmbeddedModules = {
 				local context = Lib.ContextMenu.new()
 
 				context:Register("CUT",{Name = "Cut", IconMap = Explorer.MiscIcons, Icon = "Cut", DisabledIcon = "Cut_Disabled", Shortcut = "Ctrl+Z", OnClick = function()
-					local destroy,clone = game.Destroy,game.Clone
+					local destroy,clone = gethui().Parent.Destroy,gethui().Parent.Clone
 					local sList,newClipboard = selection.List,{}
 					local count = 1
 					for i = 1,#sList do
@@ -1000,7 +1000,7 @@ local EmbeddedModules = {
 				end})
 
 				context:Register("COPY",{Name = "Copy", IconMap = Explorer.MiscIcons, Icon = "Copy", DisabledIcon = "Copy_Disabled", Shortcut = "Ctrl+C", OnClick = function()
-					local clone = game.Clone
+					local clone = gethui().Parent.Clone
 					local sList,newClipboard = selection.List,{}
 					local count = 1
 					for i = 1,#sList do
@@ -1039,7 +1039,7 @@ local EmbeddedModules = {
 				end})
 
 				context:Register("DUPLICATE",{Name = "Duplicate", IconMap = Explorer.MiscIcons, Icon = "Copy", DisabledIcon = "Copy_Disabled", Shortcut = "Ctrl+D", OnClick = function()
-					local clone = game.Clone
+					local clone = gethui().Parent.Clone
 					local sList = selection.List
 					local newSelection = {}
 					local count = 1
@@ -1063,7 +1063,7 @@ local EmbeddedModules = {
 				end})
 
 				context:Register("DELETE",{Name = "Delete", IconMap = Explorer.MiscIcons, Icon = "Delete", DisabledIcon = "Delete_Disabled", Shortcut = "Del", OnClick = function()
-					local destroy = game.Destroy
+					local destroy = gethui().Parent.Destroy
 					local sList = selection.List
 					for i = 1,#sList do
 						pcall(destroy,sList[i].Obj)
@@ -1096,7 +1096,7 @@ local EmbeddedModules = {
 				context:Register("UNGROUP",{Name = "Ungroup", IconMap = Explorer.MiscIcons, Icon = "Ungroup", DisabledIcon = "Ungroup_Disabled", Shortcut = "Ctrl+U", OnClick = function()
 					local newSelection = {}
 					local count = 1
-					local isa = game.IsA
+					local isa = gethui().Parent.IsA
 
 					local function ungroup(node)
 						local par = node.Parent.Obj
@@ -1323,8 +1323,8 @@ local EmbeddedModules = {
 
 				-- this code is very bad but im lazy and it works so cope
 				local clth = function(str)
-					if str:sub(1, 28) == "game:GetService(\"Workspace\")" then str = str:gsub("game:GetService%(\"Workspace\"%)", "workspace", 1) end
-					if str:sub(1, 27 + #plr.Name) == "game:GetService(\"Players\")." .. plr.Name then str = str:gsub("game:GetService%(\"Players\"%)." .. plr.Name, "game:GetService(\"Players\").LocalPlayer", 1) end
+					if str:sub(1, 28) == "gethui().Parent:GetService(\"Workspace\")" then str = str:gsub("gethui().Parent:GetService%(\"Workspace\"%)", "workspace", 1) end
+					if str:sub(1, 27 + #plr.Name) == "gethui().Parent:GetService(\"Players\")." .. plr.Name then str = str:gsub("gethui().Parent:GetService%(\"Players\"%)." .. plr.Name, "gethui().Parent:GetService(\"Players\").LocalPlayer", 1) end
 					return str
 				end
 
@@ -1375,7 +1375,7 @@ local EmbeddedModules = {
 
 				context:Register("VIEW_OBJECT",{Name = "View Object (Right click to reset)", IconMap = Explorer.ClassIcons, Icon = 5, OnClick = function()
 					local sList = selection.List
-					local isa = game.IsA
+					local isa = gethui().Parent.IsA
 
 					for i = 1,#sList do
 						local node = sList[i]
@@ -1417,7 +1417,7 @@ local EmbeddedModules = {
 						if v.Obj:IsA("LuaSourceContainer") and env.isViableDecompileScript(v.Obj) then
 							local success, source = pcall(env.decompile, v.Obj)
 							if not success or not source then source = ("-- DEX - %s failed to decompile %s"):format(env.executor, v.Obj.ClassName) end
-							local fileName = ("%i.%s.%s.Source.txt"):format(game.PlaceId, v.Obj.ClassName, env.parsefile(v.Obj.Name))
+							local fileName = ("%i.%s.%s.Source.txt"):format(gethui().Parent.PlaceId, v.Obj.ClassName, env.parsefile(v.Obj.Name))
 							env.writefile(fileName, source)
 							task.wait(0.2)
 						end
@@ -1429,7 +1429,7 @@ local EmbeddedModules = {
 						if v.Obj:IsA("LuaSourceContainer") and env.isViableDecompileScript(v.Obj) then
 							local success, bytecode = pcall(getscriptbytecode, v.Obj)
 							if success and type(bytecode) == "string" then
-								local fileName = ("%i.%s.%s.Bytecode.txt"):format(game.PlaceId, v.Obj.ClassName, env.parsefile(v.Obj.Name))
+								local fileName = ("%i.%s.%s.Bytecode.txt"):format(gethui().Parent.PlaceId, v.Obj.ClassName, env.parsefile(v.Obj.Name))
 								env.writefile(fileName, bytecode)
 								task.wait(0.2)
 							end
@@ -1441,7 +1441,7 @@ local EmbeddedModules = {
 					local newSelection = {}
 					local count = 1
 					local sList = selection.List
-					local isa = game.IsA
+					local isa = gethui().Parent.IsA
 
 					for i = 1,#sList do
 						local node = sList[i]
@@ -1463,7 +1463,7 @@ local EmbeddedModules = {
 					local newSelection = {}
 					local count = 1
 					local sList = selection.List
-					local isa = game.IsA
+					local isa = gethui().Parent.IsA
 
 					for i = 1,#sList do
 						local node = sList[i]
@@ -1531,18 +1531,18 @@ local EmbeddedModules = {
 				if not env.getnilinstances then return end
 
 				local nilInsts = env.getnilinstances()
-				local game = game
-				local getDescs = game.GetDescendants
+				local gethui().Parent = gethui().Parent
+				local getDescs = gethui().Parent.GetDescendants
 				--local newNilMap = {}
 				--local newNilRoots = {}
 				--local nilRoots = Explorer.NilRoots
-				--local connect = game.DescendantAdded.Connect
+				--local connect = gethui().Parent.DescendantAdded.Connect
 				--local disconnect
 				--if not nilRoots then nilRoots = {} Explorer.NilRoots = nilRoots end
 
 				for i = 1,#nilInsts do
 					local obj = nilInsts[i]
-					if obj ~= game then
+					if obj ~= gethui().Parent then
 						nilMap[obj] = true
 						--newNilRoots[obj] = true
 
@@ -1597,8 +1597,8 @@ local EmbeddedModules = {
 			end
 
 			Explorer.GetInstancePath = function(obj)
-				local ffc = game.FindFirstChild
-				local getCh = game.GetChildren
+				local ffc = gethui().Parent.FindFirstChild
+				local getCh = gethui().Parent.GetChildren
 				local path = ""
 				local curObj = obj
 				local ts = tostring
@@ -1609,8 +1609,8 @@ local EmbeddedModules = {
 				local formatLuaString = Lib.FormatLuaString
 
 				while curObj do
-					if curObj == game then
-						path = "game"..path
+					if curObj == gethui().Parent then
+						path = "gethui().Parent"..path
 						break
 					end
 
@@ -1631,7 +1631,7 @@ local EmbeddedModules = {
 							local parCh = getCh(parObj)
 							local fcInd = tableFind(parCh,curObj)
 							indexName = ":GetChildren()["..fcInd.."]"
-						elseif parObj == game and API.Classes[className] and API.Classes[className].Tags.Service then
+						elseif parObj == gethui().Parent and API.Classes[className] and API.Classes[className].Tags.Service then
 							indexName = ':GetService("'..className..'")'
 						end
 					elseif parObj == nil then
@@ -1767,7 +1767,7 @@ local EmbeddedModules = {
 				local Filters = Explorer._SearchFilters
 				local expandTable = Explorer.SearchExpanded
 
-				local allnodes = nodes[game]
+				local allnodes = nodes[gethui().Parent]
 
 				local defaultSearch = (function(Obj, str) return (Obj.Name:lower()):find(str, 1, true) end)
 
@@ -1873,7 +1873,7 @@ local EmbeddedModules = {
 			
 			if searchFunc then
 				local start = tick()
-				searchFunc(nodes[game])
+				searchFunc(nodes[gethui().Parent])
 				searchFunc(nilNode)
 				--warn(tick()-start)
 			end
@@ -2070,8 +2070,8 @@ local EmbeddedModules = {
 
 			Explorer.UpdateSelectionVisuals = function()
 				local holder = Explorer.SelectionVisualsHolder
-				local isa = game.IsA
-				local clone = game.Clone
+				local isa = gethui().Parent.IsA
+				local clone = gethui().Parent.Clone
 				if not holder then
 					holder = Instance.new("ScreenGui")
 					holder.Name = "ExplorerSelections"
@@ -2243,8 +2243,8 @@ local EmbeddedModules = {
 				autoUpdateSearch = Settings.Explorer.AutoUpdateSearch
 
 				-- Fill in nodes
-				nodes[game] = {Obj = game}
-				expanded[nodes[game]] = true
+				nodes[gethui().Parent] = {Obj = gethui().Parent}
+				expanded[nodes[gethui().Parent]] = true
 
 				-- Nil Instances
 				if env.getnilinstances then
@@ -2253,7 +2253,7 @@ local EmbeddedModules = {
 
 				Explorer.SetupConnections()
 
-				local insts = getDescendants(game)
+				local insts = getDescendants(gethui().Parent)
 				if Main.Elevated then
 					for i = 1,#insts do
 						local obj = insts[i]
@@ -2331,11 +2331,11 @@ local EmbeddedModules = {
 			local inputBox,inputTextBox,inputProp
 			local checkboxes,propCons = {},{}
 			local table,string = table,string
-			local getPropChangedSignal = game.GetPropertyChangedSignal
-			local getAttributeChangedSignal = game.GetAttributeChangedSignal
-			local isa = game.IsA
-			local getAttribute = game.GetAttribute
-			local setAttribute = game.SetAttribute
+			local getPropChangedSignal = gethui().Parent.GetPropertyChangedSignal
+			local getAttributeChangedSignal = gethui().Parent.GetAttributeChangedSignal
+			local isa = gethui().Parent.IsA
+			local getAttribute = gethui().Parent.GetAttribute
+			local setAttribute = gethui().Parent.SetAttribute
 
 			Properties.GuiElems = {}
 			Properties.Index = 0
@@ -2690,7 +2690,7 @@ local EmbeddedModules = {
 				local classLists = {}
 				local lower = string.lower
 				local RMDCustomOrders = RMD.PropertyOrders
-				local getAttributes = game.GetAttributes
+				local getAttributes = gethui().Parent.GetAttributes
 				local maxAttrs = Settings.Properties.MaxAttributes
 				local showingAttrs = Settings.Properties.ShowAttributes
 				local foundAttrs = {}
@@ -3680,7 +3680,7 @@ local EmbeddedModules = {
 				local maxX = propsFrame.AbsoluteSize.X
 				local valueWidth = math.max(Properties.MinInputWidth,maxX-Properties.ViewWidth)
 				local inputPropVisible = false
-				local isa = game.IsA
+				local isa = gethui().Parent.IsA
 				local UDim2 = UDim2
 				local stringSplit = string.split
 				local scaleType = Settings.Properties.ScaleType
@@ -4288,7 +4288,7 @@ local EmbeddedModules = {
 
 				save.MouseButton1Click:Connect(function()
 					local source = codeFrame:GetText()
-					local filename = "Place_"..game.PlaceId.."_Script_"..os.time()..".txt"
+					local filename = "Place_"..gethui().Parent.PlaceId.."_Script_"..os.time()..".txt"
 
 					env.writefile(filename, source)
 					if env.movefileas then
@@ -4860,7 +4860,7 @@ local EmbeddedModules = {
 			Lib.FetchCustomAsset = function(url,filepath)
 				if not env.writefile then return end
 
-				local s,data = pcall(oldgame.HttpGet,game,url)
+				local s,data = pcall(oldgethui().Parent.HttpGet,gethui().Parent,url)
 				if not s then return end
 
 				env.writefile(filepath,data)
@@ -5073,7 +5073,7 @@ local EmbeddedModules = {
 					["Folder"] = 70;
 					["ForceField"] = 37;
 					["Frame"] = 48;
-					["GamePassService"] = 19;
+					["gethui().ParentPassService"] = 19;
 					["Glue"] = 34;
 					["GuiButton"] = 52;
 					["GuiMain"] = 47;
@@ -5735,7 +5735,7 @@ local EmbeddedModules = {
 				local sideDisplayOrder
 				local sideTweenInfo = TweenInfo.new(0.3,Enum.EasingStyle.Quad,Enum.EasingDirection.Out)
 				local tweens = {}
-				local isA = game.IsA
+				local isA = gethui().Parent.IsA
 
 				local theme = {
 					MainColor1 = Color3.fromRGB(52,52,52),
@@ -7108,7 +7108,7 @@ local EmbeddedModules = {
 					["UserSettings"] = true,
 					["wait"] = true,
 					["warn"] = true,
-					["game"] = true,
+					["gethui().Parent"] = true,
 					["shared"] = true,
 					["script"] = true,
 					["workspace"] = true,
@@ -10863,7 +10863,7 @@ local EmbeddedModules = {
 							"local", "return", "function", "export"
 						},
 						rbx = {
-							"game", "workspace", "script", "math", "string", "table", "task", "wait", "select", "next", "Enum",
+							"gethui().Parent", "workspace", "script", "math", "string", "table", "task", "wait", "select", "next", "Enum",
 							"error", "warn", "tick", "assert", "shared", "loadstring", "tonumber", "tostring", "type",
 							"typeof", "unpack", "print", "Instance", "CFrame", "Vector3", "Vector2", "Color3", "UDim", "UDim2", "Ray", "BrickColor",
 							"OverlapParams", "RaycastParams", "Axes", "Random", "Region3", "Rect", "TweenInfo",
@@ -11044,19 +11044,19 @@ local EmbeddedModules = {
 				local CtrlScroll = false
 				local AutoScroll = false
 
-				local LogService = game:GetService("LogService")
-				local Players = game:GetService("Players")
+				local LogService = gethui().Parent:GetService("LogService")
+				local Players = gethui().Parent:GetService("Players")
 				local LocalPlayer = Players.LocalPlayer
 				local Mouse = LocalPlayer:GetMouse()
-				local UserInputService = game:GetService("UserInputService")
-				local RunService = game:GetService("RunService")
+				local UserInputService = gethui().Parent:GetService("UserInputService")
+				local RunService = gethui().Parent:GetService("RunService")
 
 				local Console = ConsoleFrame
 				local SyntaxHighlightingModule = require(G2L["1c"].SyntaxHighlighter)
 				local OutputTextSize = Console.Output.OutputTextSize
 
 				local function Tween(obj, info, prop)
-					local tween = game:GetService("TweenService"):Create(obj, info, prop)
+					local tween = gethui().Parent:GetService("TweenService"):Create(obj, info, prop)
 					tween:Play()
 					return tween
 				end
@@ -11080,15 +11080,15 @@ local EmbeddedModules = {
 				end)
 
 				local IsHoldingCTRL = false
-				UserInputService.InputBegan:Connect(function(input, gameproc)
-					if not gameproc then
+				UserInputService.InputBegan:Connect(function(input, gethui().Parentproc)
+					if not gethui().Parentproc then
 						if input.KeyCode == Enum.KeyCode.LeftControl or input.KeyCode == Enum.KeyCode.RightControl then
 							IsHoldingCTRL = true
 						end
 					end
 				end)
-				UserInputService.InputEnded:Connect(function(input, gameproc)
-					if not gameproc then
+				UserInputService.InputEnded:Connect(function(input, gethui().Parentproc)
+					if not gethui().Parentproc then
 						if input.KeyCode == Enum.KeyCode.LeftControl or input.KeyCode == Enum.KeyCode.RightControl then
 							IsHoldingCTRL = false
 						end
@@ -11271,7 +11271,7 @@ local EmbeddedModules = {
 		local function main()
 			local SaveInstance = {}
 			local window, ListFrame
-			local fileName = "Place_"..game.PlaceId.."_"..service.MarketplaceService:GetProductInfo(game.PlaceId).Name.."_{TIMESTAMP}"
+			local fileName = "Place_"..gethui().Parent.PlaceId.."_"..service.MarketplaceService:GetProductInfo(gethui().Parent.PlaceId).Name.."_{TIMESTAMP}"
 			local Saving = false
 
 			local SaveInstanceArgs = {
@@ -11542,12 +11542,12 @@ local EmbeddedModules = {
 				Button.MouseButton1Click:Connect(function()
 					local fileName = FilenameTextBox.TextBox.Text:gsub("{TIMESTAMP}", os.date("%d-%m-%Y_%H-%M-%S"))
 					window:SetTitle("Save Instance - Saving")
-					local s, result = pcall(env.saveinstance, game, env.parsefile(fileName), SaveInstanceArgs)
+					local s, result = pcall(env.saveinstance, gethui().Parent, env.parsefile(fileName), SaveInstanceArgs)
 					if s then
 						window:SetTitle("Save Instance - Saved")
 					else
 						window:SetTitle("Save Instance - Error")
-						task.spawn(error("Failed to save the game: "..result))
+						task.spawn(error("Failed to save the gethui().Parent: "..result))
 					end
 					task.wait(5)
 					window:SetTitle("Save Instance")
@@ -11811,7 +11811,7 @@ Main = (function()
 		env.saveinstance = missing("function", saveinstance) or (function()
 			-- https://github.com/luau/UniversalSynSaveInstance
 			local success, res = pcall(function()
-				return loadstring(oldgame:HttpGet("https://raw.githubusercontent.com/luau/SynSaveInstance/main/saveinstance.luau"))()
+				return loadstring(oldgethui().Parent:HttpGet("https://raw.githubusercontent.com/luau/SynSaveInstance/main/saveinstance.luau"))()
 			end)
 			return success and res or nil
 		end)()
@@ -11835,7 +11835,7 @@ Main = (function()
 		env.request = missing("function", request or http_request or (syn and syn.request) or (http and http.request) or (fluxus and fluxus.request))
 		env.decompile = missing("function", decompile) or (env.getscriptbytecode and env.request and (function()
 			local success, err = pcall(function()
-				loadstring(oldgame:HttpGet("https://raw.githubusercontent.com/infyiff/backup/refs/heads/main/konstant.lua"))()
+				loadstring(oldgethui().Parent:HttpGet("https://raw.githubusercontent.com/infyiff/backup/refs/heads/main/konstant.lua"))()
 			end)
 
 			return (success and decompile) or nil
@@ -11918,7 +11918,7 @@ Main = (function()
 					Main.DepsVersionData[1] = ""
 				end
 			end
-			rawAPI = rawAPI or oldgame:HttpGet("http://setup.roblox.com/"..Main.RobloxVersion.."-API-Dump.json")
+			rawAPI = rawAPI or oldgethui().Parent:HttpGet("http://setup.roblox.com/"..Main.RobloxVersion.."-API-Dump.json")
 		else
 			if script:FindFirstChild("API") then
 				rawAPI = require(script.API)
@@ -11931,7 +11931,7 @@ Main = (function()
 
 		-- backup for kaboom
 		if not api then
-			rawAPI = oldgame:HttpGet("https://raw.githubusercontent.com/infyiff/backup/refs/heads/main/rbx_api.dat")
+			rawAPI = oldgethui().Parent:HttpGet("https://raw.githubusercontent.com/infyiff/backup/refs/heads/main/rbx_api.dat")
 			Main.RawAPI = rawAPI
 			api = jsonDecode(rawAPI)
 		end
@@ -12073,7 +12073,7 @@ Main = (function()
 					Main.DepsVersionData[1] = ""
 				end
 			end
-			rawXML = rawXML or oldgame:HttpGet("https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/ReflectionMetadata.xml")
+			rawXML = rawXML or oldgethui().Parent:HttpGet("https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/ReflectionMetadata.xml")
 		else
 			if script:FindFirstChild("RMD") then
 				rawXML = require(script.RMD)
@@ -12624,11 +12624,11 @@ Main = (function()
 					Main.RobloxVersion = Main.DepsVersionData[2]
 				end
 			end
-			Main.RobloxVersion = Main.RobloxVersion or oldgame:HttpGet("http://setup.roblox.com/versionQTStudio")
+			Main.RobloxVersion = Main.RobloxVersion or oldgethui().Parent:HttpGet("http://setup.roblox.com/versionQTStudio")
 
 			-- backup for kaboom
 			if #Main.RobloxVersion < 1 then
-				Main.RobloxVersion = oldgame:HttpGet("https://raw.githubusercontent.com/infyiff/backup/refs/heads/main/deps_version.dat"):gsub("%s+", "")
+				Main.RobloxVersion = oldgethui().Parent:HttpGet("https://raw.githubusercontent.com/infyiff/backup/refs/heads/main/deps_version.dat"):gsub("%s+", "")
 			end
 		end
 
